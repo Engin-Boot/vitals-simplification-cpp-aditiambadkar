@@ -25,4 +25,5 @@ int main() {
   assert(vitalsAreOk(60, 90, 40) == false);
   assert(vitalIsInLimits(90, 70, 150) == true);
   assert(vitalIsInLimits(80, 90, 100) == false);
+  assert(vitalIsInLimits(98, 30, 95) == false);
 }
