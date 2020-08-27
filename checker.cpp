@@ -22,7 +22,7 @@ bool respRateIsOk(float respRate) {
 }
 
 bool vitalsAreOk(float bpm, float spo2, float respRate) {
-  if(bpmIsOk(float bpm) && spo2IsOk(float spo2) && respRateIsOk(float respRate)) {
+  if(bpmIsOk(bpm) && spo2IsOk(spo2) && respRateIsOk(respRate)) {
     return true;
   }
   return false;
