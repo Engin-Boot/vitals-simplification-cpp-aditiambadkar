@@ -1,31 +1,19 @@
 #include <assert.h>
 
 bool bpmIsOk(float bpm) {
-  if(bpm < 70 || bpm > 150) {
-    return false;
-  }
-  return true;
+  return (bpm >= 70 && bpm < 150);
 }
 
 bool spo2IsOk(float spo2) {
-  if(spo2 < 90) {
-    return false;
-  }
-  return true;
+  return (spo2 > 90);
 }
 
 bool respRateIsOk(float respRate) {
-  if(respRate < 30 || respRate > 95) {
-    return false;
-  }
-  return true;
+  return (respRate >= 30 && respRate <= 95);
 }
 
 bool vitalsAreOk(float bpm, float spo2, float respRate) {
-  if(bpmIsOk(bpm) && spo2IsOk(spo2) && respRateIsOk(respRate)) {
-    return true;
-  }
-  return false;
+  return (bpmIsOk(bpm) && spo2IsOk(spo2) && respRateIsOk(respRate));
 }
 
 int main() {
