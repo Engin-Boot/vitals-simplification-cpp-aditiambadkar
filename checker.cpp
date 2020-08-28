@@ -6,7 +6,7 @@ using namespace std;
 class Alert
 {
   public:
-    virtual void raiseAlert(const char*, const char*);
+    virtual void raiseAlert(const char*, const char*) = 0;
 };
 
 class AlertWithSMS: public Alert
