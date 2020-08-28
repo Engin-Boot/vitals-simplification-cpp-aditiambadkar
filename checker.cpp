@@ -48,13 +48,13 @@ class VitalsChecker
       
       alert = &alertWithSMS;
       alert->raiseAlert("BPM", bpmLevel);
-      alert->raiseAlert("SPO2", spo2);
-      alert->raiseAlert("Resp Rate", respRate);
+      alert->raiseAlert("SPO2", spo2Level);
+      alert->raiseAlert("Resp Rate", respRateLevel);
       
       alert = &alertWithSound;
       alert->raiseAlert("BPM", bpmLevel);
-      alert->raiseAlert("SPO2", spo2);
-      alert->raiseAlert("Resp Rate", respRate);
+      alert->raiseAlert("SPO2", spo2Level);
+      alert->raiseAlert("Resp Rate", respRateLevel);
     }
 };
 
