@@ -67,4 +67,5 @@ int main() {
   VitalsChecker vitalsChecker;
   vitalsChecker.vitalsAreOk(80, 95, 60);
   vitalsChecker.vitalsAreOk(60, 90, 40);
+  vitalsChecker.vitalsAreOk(80, 90, 100);
 }
