@@ -18,7 +18,7 @@ class AlertWithSMS: public Alert
     }
 };
 
-class AlertWithSound
+class AlertWithSound: public Alert
 {
   public:
     void raiseAlert(const char* vitalName, const char* level)
@@ -66,4 +66,5 @@ int main() {
   assert(vitalIsInLimits(98, 30, 95) == false);*/
   VitalsChecker vitalsChecker;
   vitalsChecker.vitalsAreOk(80, 95, 60);
+  vitalsChecker.vitalsAreOk(60, 90, 40);
 }
