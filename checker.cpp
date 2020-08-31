@@ -1,71 +1,96 @@
-#include<assert.h>
 #include<iostream>
+#include<assert.h>
 
 using namespace std;
 
-class Alert
+class AlertInterface
 {
-  public:
-    virtual void raiseAlert(const char*, const char*) = 0;
+public:
+	virtual void raiseAlert(const char*, const char*) = 0;
 };
 
-class AlertWithSMS: public Alert
+class AlertWithSMS : public AlertInterface
 {
-  public:
-    void raiseAlert(const char* vitalName, const char* level)
-    {
-      cout<<"SMS : "<<vitalName<<" "<<level<<endl;
-    }
+public:
+	void raiseAlert(const char* vitalName, const char* vitalLevel)
+	{
+		cout << "SMS : " << vitalName << " " << vitalLevel << endl;
+	}
 };
 
-class AlertWithSound: public Alert
+class AlertWithSound : public AlertInterface
 {
-  public:
-    void raiseAlert(const char* vitalName, const char* level)
-    {
-      cout<<"Sound : "<<vitalName<<" "<<level<<endl;
-    }
+public:
+	void raiseAlert(const char* vitalName, const char* vitalLevel)
+	{
+		cout << "Sound : " << vitalName << " " << vitalLevel << endl;
+	}
 };
 
-class VitalsChecker
+class AlertIntegrator : public AlertInterface
 {
-  public:
-    const char* vitalIsInLimits(int vitalValue, int lowerLimit, int upperLimit) {
-      if(vitalValue < lowerLimit)
-        return "TOO LOW";
-      if(vitalValue > upperLimit)
-        return "TOO HIGH";
-      return "NORMAL";
-    }
-    void vitalsAreOk(float bpm, float spo2, float respRate) {
-      const char* bpmLevel = vitalIsInLimits(bpm, 70, 150);
-      const char* spo2Level = vitalIsInLimits(spo2, 90, 100);
-      const char* respRateLevel = vitalIsInLimits(respRate, 30, 95);
-      
-      Alert* alert;
-      AlertWithSMS alertWithSMS;
-      AlertWithSound alertWithSound;
-      
-      alert = &alertWithSMS;
-      alert->raiseAlert("BPM", bpmLevel);
-      alert->raiseAlert("SPO2", spo2Level);
-      alert->raiseAlert("Resp Rate", respRateLevel);
-      
-      alert = &alertWithSound;
-      alert->raiseAlert("BPM", bpmLevel);
-      alert->raiseAlert("SPO2", spo2Level);
-      alert->raiseAlert("Resp Rate", respRateLevel);
-    }
+private:
+	AlertWithSMS alertWithSMS;
+	AlertWithSound alertWithSound;
+public:
+	void raiseAlert(const char* vitalName, const char* vitalLevel)
+	{
+		alertWithSMS.raiseAlert(vitalName, vitalLevel);
+		alertWithSound.raiseAlert(vitalName, vitalLevel);
+	}
 };
 
-int main() {
-  /*assert(vitalsAreOk(80, 95, 60) == true);
-  assert(vitalsAreOk(60, 90, 40) == false);
-  assert(vitalIsInLimits(90, 70, 150) == true);
-  assert(vitalIsInLimits(80, 90, 100) == false);
-  assert(vitalIsInLimits(98, 30, 95) == false);*/
-  VitalsChecker vitalsChecker;
-  vitalsChecker.vitalsAreOk(80, 95, 60);
-  vitalsChecker.vitalsAreOk(60, 90, 40);
-  vitalsChecker.vitalsAreOk(80, 90, 100);
+class VitalRangeChecker
+{
+private:
+	int lowerLimit;
+	int upperLimit;
+	const char* vitalName;
+
+public:
+	VitalRangeChecker(const char*, int, int, AlertIntegrator*);
+	const char* checkVitalLevel(int);
+};
+
+VitalRangeChecker::VitalRangeChecker(const char* vitalName, int lowerLimit, int upperLimit, AlertIntegrator* alertIntegrator)
+{
+	this->vitalName = vitalName;
+	this->lowerLimit = lowerLimit;
+	this->upperLimit = upperLimit;
+}
+
+const char* VitalRangeChecker::checkVitalLevel(int vitalValue)
+{
+	if (vitalValue < lowerLimit)
+		return "TOO LOW";
+	if (vitalValue > upperLimit)
+		return "TOO HIGH";
+	return "NORMAL";
+}
+
+class VitalsIntegrator
+{
+private:
+	VitalRangeChecker bpmChecker, spo2Checker, respRateChecker;
+	
+public:
+	VitalsIntegrator(AlertIntegrator* alertIntegrator) : bpmChecker("BPM", 70, 150, alertIntegrator),
+		spo2Checker("BPM", 70, 150, alertIntegrator),
+		respRateChecker("BPM", 70, 150, alertIntegrator)
+	{ }
+	void checkAllVitals(float, float, float);
+};
+
+void VitalsIntegrator::checkAllVitals(float bpm, float spo2, float respRate)
+{
+	bpmChecker.checkVitalLevel(bpm);
+	spo2Checker.checkVitalLevel(spo2);
+	respRateChecker.checkVitalLevel(respRate);
+}
+
+int main()
+{
+	AlertIntegrator alertIntegrator;
+	VitalsIntegrator vitalsIntegrator(&alertIntegrator);
+
 }
