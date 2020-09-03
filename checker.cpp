@@ -1,4 +1,5 @@
 #include<iostream>
+#include<vector>
 #include<assert.h>
 
 using namespace std;
@@ -33,7 +34,7 @@ private:
 	AlertWithSMS alertWithSMS;
 	AlertWithSound alertWithSound;
 public:
-	void raiseAlert(const char* vitalName, const char* vitalLevel)
+	void raiseAlert(const char* vitalName, const char* vitalLevel) override
 	{
 		alertWithSMS.raiseAlert(vitalName, vitalLevel);
 		alertWithSound.raiseAlert(vitalName, vitalLevel);
@@ -46,51 +47,59 @@ private:
 	int lowerLimit;
 	int upperLimit;
 	const char* vitalName;
+	AlertInterface* alerter;
 
 public:
-	VitalRangeChecker(const char*, int, int, AlertIntegrator*);
-	const char* checkVitalLevel(int);
+	VitalRangeChecker(const char*, int, int, AlertInterface*);
+	void checkVitalLevel(float);
 };
 
-VitalRangeChecker::VitalRangeChecker(const char* vitalName, int lowerLimit, int upperLimit, AlertIntegrator* alertIntegrator)
+VitalRangeChecker::VitalRangeChecker(const char* vitalName, int lowerLimit, int upperLimit, AlertInterface* alerter)
 {
 	this->vitalName = vitalName;
 	this->lowerLimit = lowerLimit;
 	this->upperLimit = upperLimit;
+	this->alerter = alerter;
 }
 
-const char* VitalRangeChecker::checkVitalLevel(int vitalValue)
+void VitalRangeChecker::checkVitalLevel(float vitalValue)
 {
 	if (vitalValue < lowerLimit)
-		return "TOO LOW";
-	if (vitalValue > upperLimit)
-		return "TOO HIGH";
-	return "NORMAL";
+		alerter->raiseAlert(vitalName, "TOO LOW");
+	else if (vitalValue > upperLimit)
+		alerter->raiseAlert(vitalName, "TOO HIGH");
+	else
+		alerter->raiseAlert(vitalName, "OK");
 }
 
 class VitalsIntegrator
 {
 private:
-	VitalRangeChecker bpmChecker, spo2Checker, respRateChecker;
-	
+	vector<VitalRangeChecker> vitalDetails;
+
 public:
-	VitalsIntegrator(AlertIntegrator* alertIntegrator) : bpmChecker("BPM", 70, 150, alertIntegrator),
-		spo2Checker("BPM", 70, 150, alertIntegrator),
-		respRateChecker("BPM", 70, 150, alertIntegrator)
-	{ }
-	void checkAllVitals(float, float, float);
+	VitalsIntegrator(AlertInterface* alertPtr)
+	{
+		vitalDetails.push_back(VitalRangeChecker("bpm", 70, 150, alertPtr));
+		vitalDetails.push_back(VitalRangeChecker("spo2", 90, 100, alertPtr));
+		vitalDetails.push_back(VitalRangeChecker("respRate", 30, 95, alertPtr));
+	}
+	void checkAllVitals(const vector<float>);
 };
 
-void VitalsIntegrator::checkAllVitals(float bpm, float spo2, float respRate)
+void VitalsIntegrator::checkAllVitals(vector<float> vitalValuesToCheck)
 {
-	bpmChecker.checkVitalLevel(bpm);
-	spo2Checker.checkVitalLevel(spo2);
-	respRateChecker.checkVitalLevel(respRate);
+	for (int i = 0; i < vitalDetails.size(); i++)
+	{
+		vitalDetails[i].checkVitalLevel(vitalValuesToCheck[i]);
+	}
 }
 
 int main()
 {
-	AlertIntegrator alertIntegrator;
-	VitalsIntegrator vitalsIntegrator(&alertIntegrator);
-
+	AlertIntegrator alerter;
+	VitalsIntegrator vitals(&alerter);
+	vitals.checkAllVitals({ 85, 98, 88 });
+	vitals.checkAllVitals({ 65, 92, 97 });
+	return 0;
 }
