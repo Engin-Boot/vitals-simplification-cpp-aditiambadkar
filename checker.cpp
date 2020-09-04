@@ -1,5 +1,6 @@
 #include<iostream>
-#include<vector>
+#include<map>
+#include<string>
 #include<assert.h>
 
 using namespace std;
@@ -50,6 +51,7 @@ private:
 	AlertInterface* alerter;
 
 public:
+	VitalRangeChecker() {}
 	VitalRangeChecker(const char*, int, int, AlertInterface*);
 	void checkVitalLevel(float);
 };
@@ -75,23 +77,25 @@ void VitalRangeChecker::checkVitalLevel(float vitalValue)
 class VitalsIntegrator
 {
 private:
-	vector<VitalRangeChecker> vitalDetails;
+	map<string, VitalRangeChecker> vitalDetails;
 
 public:
 	VitalsIntegrator(AlertInterface* alertPtr)
 	{
-		vitalDetails.push_back(VitalRangeChecker("bpm", 70, 150, alertPtr));
-		vitalDetails.push_back(VitalRangeChecker("spo2", 90, 100, alertPtr));
-		vitalDetails.push_back(VitalRangeChecker("respRate", 30, 95, alertPtr));
+		vitalDetails["bpm"] = VitalRangeChecker("bpm", 70, 150, alertPtr);
+		vitalDetails["spo2"] = VitalRangeChecker("spo2", 90, 100, alertPtr);
+		vitalDetails["respRate"] = VitalRangeChecker("respRate", 30, 95, alertPtr);
 	}
-	void checkAllVitals(const vector<float>);
+	void checkAllVitals(const map<string, float>& );
 };
 
-void VitalsIntegrator::checkAllVitals(vector<float> vitalValuesToCheck)
+void VitalsIntegrator::checkAllVitals(const map<string, float> &vitalValuesToCheck)
 {
-	for (int i = 0; i < vitalDetails.size(); i++)
+	map<string, float>::const_iterator itr = vitalValuesToCheck.begin();
+	while (itr != vitalValuesToCheck.end())
 	{
-		vitalDetails[i].checkVitalLevel(vitalValuesToCheck[i]);
+		vitalDetails[itr->first].checkVitalLevel(itr->second);
+		itr++;
 	}
 }
 
@@ -99,7 +103,7 @@ int main()
 {
 	AlertIntegrator alerter;
 	VitalsIntegrator vitals(&alerter);
-	vitals.checkAllVitals({ 85, 98, 88 });
-	vitals.checkAllVitals({ 65, 92, 97 });
+	vitals.checkAllVitals({ {"bpm", 78},{"spo2", 95}, {"respRate", 90} });
+	vitals.checkAllVitals({ {"bpm", 65},{"spo2", 98}, {"respRate", 97} });
 	return 0;
 }
